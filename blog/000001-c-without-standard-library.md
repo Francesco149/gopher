@@ -591,31 +591,31 @@ also, i'm going to add the following useful flags:
 * `-Werror`: treat all warnings as error. can't let our code build with unchecked warnings
 * `-Wl,--build-id=none`: save a few bytes by not adding a build id section to the binary
 
-    $ cat > build.sh << "EOF"
-    #!/bin/sh
+      $ cat > build.sh << "EOF"
+      #!/bin/sh
 
-    exename="hello"
+      exename="hello"
 
-    gcc -std=c89 -pedantic \
-        -s -Os -Wall -Werror \
-        -nostdlib \
-        -ffreestanding \
-        -fno-unwind-tables \
-        -fno-asynchronous-unwind-tables \
-        -fdata-sections -ffunction-sections \
-        -Wl,--build-id=none,-n,-N,--gc-sections,-z,noexecstack \
-        -fno-stack-protector \
-        hello.S hello.c \
-        -o $exename &&
-    strip -R .comment $exename
-    EOF
+      gcc -std=c89 -pedantic \
+          -s -Os -Wall -Werror \
+          -nostdlib \
+          -ffreestanding \
+          -fno-unwind-tables \
+          -fno-asynchronous-unwind-tables \
+          -fdata-sections -ffunction-sections \
+          -Wl,--build-id=none,-n,-N,--gc-sections,-z,noexecstack \
+          -fno-stack-protector \
+          hello.S hello.c \
+          -o $exename &&
+      strip -R .comment $exename
+      EOF
 
-    $ chmod +x ./build.sh
-    $ ./build.sh
-    $ wc -c hello
-    536 hello
-    $ ./hello
-    hello
+      $ chmod +x ./build.sh
+      $ ./build.sh
+      $ wc -c hello
+      536 hello
+      $ ./hello
+      hello
 
 536 bytes!
 
