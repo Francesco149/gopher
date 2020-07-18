@@ -489,11 +489,11 @@ also, on some systems ld will align sections to some size by default (for exampl
 it's 8kb). according to `man ld` this can be disabled by passing `-n` or `--nmagic` to the linker,
 which through gcc would be `-Wl,n`.
 
-   -n
-   --nmagic
-       Turn off page alignment of sections, and disable linking against
-       shared libraries.  If the output format supports Unix style magic
-       numbers, mark the output as "NMAGIC"
+     -n
+     --nmagic
+         Turn off page alignment of sections, and disable linking against
+         shared libraries.  If the output format supports Unix style magic
+         numbers, mark the output as "NMAGIC"
 
 there's also `-N/--omagic` which doesn't do much on x86_64 but it will help on i386
 
