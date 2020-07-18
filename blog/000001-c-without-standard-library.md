@@ -139,12 +139,12 @@ if we read `man stdout`, we will see that they are simply hardcoded as 0, 1 and 
 
 so all we have to do is replace our puts with a write to stream 1 (stdout)
 
-#include <unistd.h>
+    #include <unistd.h>
 
-int main(int argc, char* argv[]) {
-    write(1, "hello\n", 6);
-    return 0;
-}
+    int main(int argc, char* argv[]) {
+        write(1, "hello\n", 6);
+        return 0;
+    }
 
 let's try to compile it again:
 
