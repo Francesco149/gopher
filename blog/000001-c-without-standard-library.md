@@ -1027,7 +1027,7 @@ the headers 1:1 if you want to be safer
       long tv_nsec;
     };
 
-    #if __386__
+    #if __i386__
     struct stat {
       unsigned long long st_dev;
       short __pad1;
