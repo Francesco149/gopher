@@ -771,7 +771,7 @@ in short, our _start will look something like this:
       mov edx,[ebp+16]
       mov esi,[ebp+20]
       mov edi,[ebp+24]
-      mov edi,[ebp+28]
+      mov ebp,[ebp+28]
       int 0x80
 
       pop edi
