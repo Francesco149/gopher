@@ -47,7 +47,7 @@ Microsoft Windows 6.1.7601
 Overwrite (...)\test2? (Yes|No)n
 ```
 
-after googling around, I found (this)[https://ss64.com/nt/move.html]
+after googling around, I found [this](https://ss64.com/nt/move.html)
 
 ```
 Under Windows 2000 and above, the default action is to prompt on overwrite unless the command is
