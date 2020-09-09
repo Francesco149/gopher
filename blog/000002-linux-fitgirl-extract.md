@@ -3,10 +3,8 @@ some reason
 
 let's try to extract and decompile manually with http://innounp.sourceforge.net/
 
-```
-wine innounp.exe -x -m -dextracted ./setup.exe
-wine rops-3.0.53.935-disasm/disasm.exe extracted/embedded/CompiledCode.bin disasm
-```
+    wine innounp.exe -x -m -dextracted ./setup.exe
+    wine rops-3.0.53.935-disasm/disasm.exe extracted/embedded/CompiledCode.bin disasm
 
 now let's take a look at disasm
 
@@ -15,44 +13,33 @@ it runs x5 and creates version and version_ and cmd appears to be stuck in a rea
 
 this is the command it runs
 
-```
-x5 version version.x5 version_&&del version.x5&&move version_ version
-```
+    x5 version version.x5 version_&&del version.x5&&move version_ version
 
 version.x5 disappears so clearly we are at least getting to the move
 
 if i manually kill the wineconsole process it moves to the next file and gets stuck again
-
-```
-$ ps aux | grep x5
-loli     20337  0.1  0.0 2683220 22384 ?       Ss   06:09   0:00 C:\windows\system32\cmd.exe /C C:\users\loli\Temp\is-101RB.tmp\x5.exe battleplan\scene_mp_2p_02.snapshot.bytes battleplan\scene_mp_2p_02.snapshot.bytes.x5 battleplan\scene_mp_2p_02.snapshot.bytes_&&del battleplan\scene_mp_2p_02.snapshot.bytes.x5&&move battleplan\scene_mp_2p_02.snapshot.bytes_ battleplan\scene_mp_2p_02.snapshot.bytes
-```
 
 i feel like this has to do with moving the file, because other ones that just removed the unpatched
 files work fine
 
 what happens if I try to move a file over another manually like the installer does?
 
-```
-$ touch test1 test2
-$ wine cmd /c 'move test1 test2'
-Overwrite (...)\test2? (Yes|No)n
-$ echo "move test1 test2" > test.bat
-$ wine cmd
-Microsoft Windows 6.1.7601
+    $ touch test1 test2
+    $ wine cmd /c 'move test1 test2'
+    Overwrite (...)\test2? (Yes|No)n
+    $ echo "move test1 test2" > test.bat
+    $ wine cmd
+    Microsoft Windows 6.1.7601
 
-(...)>test.bat
+    (...)>test.bat
 
-(...)>move test1 test2
-Overwrite (...)\test2? (Yes|No)n
-```
+    (...)>move test1 test2
+    Overwrite (...)\test2? (Yes|No)n
 
 after googling around, I found [this](https://ss64.com/nt/move.html)
 
-```
-Under Windows 2000 and above, the default action is to prompt on overwrite unless the command is
-being executed from within a batch script. 
-```
+    Under Windows 2000 and above, the default action is to prompt on overwrite unless the command is
+    being executed from within a batch script. 
 
 so wine isn't emulating this correctly.
 
@@ -60,7 +47,6 @@ yep, bingo. I'm gonna report this to wine and maybe fix it myself.
 
 while digging around wine code I found this:
 
-```
      /* /-Y has the highest priority, then /Y and finally the COPYCMD env. variable */
       if (wcsstr (quals, parmNoY))
         force = FALSE;
@@ -74,52 +60,97 @@ while digging around wine code I found this:
 
       /* Prompt if overwriting */
       if (!force) {
-```
 
 so we can work around it by starting the setup with a batch file that exports COPYCMD to /Y right?
 not so fast, this appears to be yet another bug in wine
 
-```
-$ export COPYCMD=/Y
-$ echo test1 > test1
-$ echo test2 > test2
-$ wine cmd /c 'move test1 test2'
-File already exists.
+    $ export COPYCMD=/Y
+    $ echo test1 > test1
+    $ echo test2 > test2
+    $ wine cmd /c 'move test1 test2'
+    File already exists.
 
-$ cat test2
-test2
-```
+    $ cat test2
+    test2
 
-# the solution
+# the solution: fixing wine cmd
 
-we're just gonna have to mv the file manually from linux and kill the cmd process. here's a script
-that automates it specifically for fitgirl installers. run it when it gets stuck
+apply this patch to wine (save it as a .patch file and do `patch -p1 < file.patch` in wine source):
 
-NOTE: this is a really shit and fragile solution, ideally you want to patch wine's cmd to not ask
-for confirmation on move. this is already reported on their bug tracker since 2019
+    From 480ac8841539ee3481edec56287ec15a5631bb58 Mon Sep 17 00:00:00 2001
+    From: "Francesco Noferi" <lolisamurai@tfwno.gf>
+    Date: Wed, 9 Sep 2020 21:33:43 +0200
+    Subject: [PATCH] cmd: Fix non-interactive move overwrite behaviour
 
-```sh
-#!/bin/sh
+    Signed-off-by: Francesco Noferi <lolisamurai@tfwno.gf>
+    ---
+     programs/cmd/builtins.c | 31 ++++++++++++++++---------------
+     1 file changed, 16 insertions(+), 15 deletions(-)
 
-while :; do
-  sleep 0.1
-  pid="$(ps aux | awk '/cmd[.]exe \/C .*[ &|]move [^&|]+ [^&|]+/ { print $2 }')" || continue
-  [ "$pid" ] || continue
-  # if x5 is still running, wait for it to terminate
-  x5pid="$(ps aux | grep -v 'cmd[.]exe' | awk '/x5[.]exe/ { print $2 }')" && [ "$x5pid" ] &&
-    echo "waiting for x5 ($x5pid)..." &&
-    tail "--pid=$x5pid" -f /dev/null
-  if [ ! "$pfx" ]; then
-    pfx="$(tr '\0' '\n' < "/proc/$pid/environ" | awk -F= '/^WINEPREFIX/ { print $2 }')" || continue
-    cd "$pfx/drive_c/Games/"* || exit # couldn't find a good way to extract the windows work dir
-  fi
-  movecmd="$(tr '\0' ' ' < "/proc/$pid/cmdline" | grep -o "move [^&|]\+ [^&|]\+" |
-             sed 's/^move/mv -v/g;s|\\|/|g;s|C:|$pfx|g')"
-  [ "$(sudo cat "/proc/$pid/stack" | sed 1q | awk -F'[ +]' '{ print $2 }' )" != "pipe_read" ] &&
-    continue
-  [ "$movecmd" ] || (echo "failed to extract move cmd" && continue)
-  $movecmd || continue
-  kill -9 "$pid"
-  tail "--pid=$pid" -f /dev/null # wait for process to terminate
-done
-```
+    diff --git a/programs/cmd/builtins.c b/programs/cmd/builtins.c
+    index 70ccdde..c218186 100644
+    --- a/programs/cmd/builtins.c
+    +++ b/programs/cmd/builtins.c
+    @@ -3026,18 +3026,17 @@ void WCMD_move (void)
+         WINE_TRACE("Source '%s'\n", wine_dbgstr_w(src));
+         WINE_TRACE("Dest   '%s'\n", wine_dbgstr_w(dest));
+     
+    -    /* If destination exists, prompt unless /Y supplied */
+    +    /* If destination exists, prompt unless called from batch */
+         if (GetFileAttributesW(dest) != INVALID_FILE_ATTRIBUTES) {
+    -      BOOL force = FALSE;
+    +      BOOL force = !interactive;
+           WCHAR copycmd[MAXSTRING];
+           DWORD len;
+     
+    -      /* /-Y has the highest priority, then /Y and finally the COPYCMD env. variable */
+    -      if (wcsstr (quals, parmNoY))
+    -        force = FALSE;
+    -      else if (wcsstr (quals, parmY))
+    -        force = TRUE;
+    -      else {
+    +      /* https://ss64.com/nt/move.html
+    +       * "Under Windows 2000 and above, the default action is to prompt on overwrite unless the
+    +       *  command is being executed from within a batch script. " */
+    +
+    +      if (!force) {
+             static const WCHAR copyCmdW[] = {'C','O','P','Y','C','M','D','\0'};
+             len = GetEnvironmentVariableW(copyCmdW, copycmd, ARRAY_SIZE(copycmd));
+             force = (len && len < ARRAY_SIZE(copycmd) && !lstrcmpiW(copycmd, parmY));
+    @@ -3051,14 +3050,16 @@ void WCMD_move (void)
+             question = WCMD_format_string(WCMD_LoadMessage(WCMD_OVERWRITE), dest);
+             ok = WCMD_ask_confirm(question, FALSE, NULL);
+             LocalFree(question);
+    +      } else {
+    +        ok = TRUE;
+    +      }
+     
+    -        /* So delete the destination prior to the move */
+    -        if (ok) {
+    -          if (!DeleteFileW(dest)) {
+    -            WCMD_print_error ();
+    -            errorlevel = 1;
+    -            ok = FALSE;
+    -          }
+    +      /* So delete the destination prior to the move */
+    +      if (ok) {
+    +        if (!DeleteFileW(dest)) {
+    +          WCMD_print_error ();
+    +          errorlevel = 1;
+    +          ok = FALSE;
+             }
+           }
+         }
+    -- 
+    2.28.0
+
+
+recompile cmd and install it into your wine prefix
+
+    ./configure
+    make programs/cmd -j$(nproc)
+    cp programs/cmd/cmd.exe /path/to/wineprefix/drive_c/windows/syswow64/cmd.exe
+
+everything should work as intended
+
+I have submitted the patch to wine here: https://bugs.winehq.org/show_bug.cgi?id=48396
