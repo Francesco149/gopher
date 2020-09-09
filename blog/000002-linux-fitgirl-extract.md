@@ -149,7 +149,7 @@ recompile cmd and install it into your wine prefix
 
     ./configure
     make programs/cmd -j$(nproc)
-    cp programs/cmd/cmd.exe /path/to/wineprefix/drive_c/windows/syswow64/cmd.exe
+    cp programs/cmd/cmd.exe.so /path/to/wineprefix/drive_c/windows/syswow64/cmd.exe
 
 everything should work as intended
 
