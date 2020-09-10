@@ -1,6 +1,9 @@
 so it seems like extracting fitgirl repacks on linux always gets stuck on the `version` file for
 some reason
 
+UPDATE: I have now made a script that automates the process [here](https://github.com/Francesco149/protonfit)
+feel free to keep reading to see how I found the problem and how it works under the hood
+
 let's try to extract and decompile manually with http://innounp.sourceforge.net/
 
     wine innounp.exe -x -m -dextracted ./setup.exe
