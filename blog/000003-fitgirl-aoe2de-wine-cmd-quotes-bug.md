@@ -169,8 +169,30 @@ here's the full output with `WINEDEBUG=+cmd`
     00c0:trace:cmd:WCMD_setshow_default Really changing to directory 'L"windows&&system32\\notepad.exe"'
     Path not found.
 
-the cmd parsing code is a nightmare but I managed to fix this by adding `&` as a character that
-ends quote-counting here:
+the cmd parsing logic for nested quotes is a nightmare:
+
+    If /C or /K is specified, then the remainder of the command line after
+    the switch is processed as a command line, where the following logic is
+    used to process quote (") characters:
+
+        1.  If all of the following conditions are met, then quote characters
+            on the command line are preserved:
+
+            - no /S switch
+            - exactly two quote characters
+            - no special characters between the two quote characters,
+              where special is one of: &<>()@^|
+            - there are one or more whitespace characters between the
+              the two quote characters
+            - the string between the two quote characters is the name
+              of an executable file.
+
+        2.  Otherwise, old behavior is to see if the first character is
+            a quote character and if so, strip the leading character and
+            remove the last quote character on the command line, preserving
+            any text after the last quote character.
+
+I managed to fix this by adding `&` as a character that ends quote-counting here:
 
     From 0750c27f4f7077b124077dd7c5cea32e51b81eeb Mon Sep 17 00:00:00 2001
     From: "Franc[e]sco" <lolisamurai@tfwno.gf>
