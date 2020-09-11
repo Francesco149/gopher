@@ -1,5 +1,7 @@
 I found yet another bug in wine's cmd.
 
+UPDATE: the fix for this bug is now upstreamed in wine 5.17
+
 I've been testing my [protonfit](https://github.com/Francesco149/protonfit) script on various
 fitgirl repacks, and Age of Empires II Definitive Edition appears to error out.
 
