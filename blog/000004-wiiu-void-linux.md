@@ -229,12 +229,9 @@ CTRL + ALT + F1
 
 xorg screen will be frozen and vice versa when you switch tty's as only one can be active at once
 
-you can set this to run at boot by creating a runit service
+you can set this to run at boot by adding it to `rc.local`
 
-    sudo mkdir /etc/sv/gamepadtty
-    printf '#!/bin/sh\ncon2fbmap 2 1\n' | sudo tee /etc/sv/gamepadtty/run
-    sudo chmod +x /etc/sv/gamepadtty/run
-    sudo ln -s /etc/sv/gamepadtty /var/service
+    echo 'con2fbmap 2 1' | sudo tee -a /etc/rc.local
 
 I also exported (and installed) a few default applications in my `~/.bashrc`
 
