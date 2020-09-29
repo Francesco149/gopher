@@ -34,8 +34,8 @@ here's how I compiled the kernel:
 
 in this menu, I searched for rtl8192cu by typing `/rtl8192cu` and pressing enter. this shows me
 numbered result. I press 1 to jump to the first result which brings me to realtek devices. I enable
-this by pressing space, navigate to `Realtek rtlwifi family of devices` , press enter on it and
-press space on `Realtek RTL8192CU/RTL8188CU USB Wireless Network Adapter` .
+this by pressing space, press space on `RTL8723AU/RTL8188[CR]U/RTL819[12]CU (mac80211) support` and
+`Include support for untested Realtek 8xxx USB devices (EXPERIMENTAL)`
 
 we also need to embed the firmware because this kernel can't load modules, so I search for
 `/extra_firm` and the first result brings me to `Build named firmware blobs into the kernel binary`
@@ -296,3 +296,6 @@ I also noticed that the clock resets on reboot so installed openntpd, commented 
 constraints in `/etc/ntpd.conf` and enabled the service
 
     sudo ln -s /etc/sv/ntpd /var/service
+
+should the clock ever fail to sync at boot, you can manually run `sudo ntpd -s -d` and let it
+run for a bit and it should set the clock
