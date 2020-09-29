@@ -233,6 +233,48 @@ you can set this to run at boot by adding it to `rc.local`
 
     echo 'con2fbmap 2 1' | sudo tee -a /etc/rc.local
 
+if you want xorg to use both screens instead, don't do the con2fbmap stuff and put this in your
+`/etc/X11/xorg.conf`
+
+    Section "Device"
+            Identifier      "FBDEV 0"
+            Driver          "fbdev"
+            Option          "fbdev" "/dev/fb0"
+    EndSection
+
+    Section "Device"
+            Identifier      "FBDEV 1"
+            Driver          "fbdev"
+            Option          "fbdev" "/dev/fb1"
+    EndSection
+
+    Section "Monitor"
+            Identifier      "AOC1"
+    EndSection
+
+    Section "Monitor"
+            Identifier      "AOC2"
+    EndSection
+
+    Section "Screen"
+            Identifier      "screen0"
+            Device          "FBDEV 0"
+            Monitor         "AOC1"
+    EndSection
+
+    Section "Screen"
+            Identifier      "screen1"
+            Device          "FBDEV 1"
+            Monitor         "AOC2"
+    EndSection
+
+    Section "ServerLayout"
+            Identifier      "default"
+            Screen 0 "screen0" 0 0
+            Screen 1 "screen1" 213 720
+            Option "Xinerama" "1"
+    EndSection
+
 I also exported (and installed) a few default applications in my `~/.bashrc`
 
     export EDITOR=nvim
