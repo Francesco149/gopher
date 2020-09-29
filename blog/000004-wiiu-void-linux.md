@@ -275,7 +275,7 @@ if you want xorg to use both screens instead, don't do the con2fbmap stuff and p
 
 I also exported (and installed) a few default applications in my `~/.bashrc`
 
-    export EDITOR=nvim
+    export EDITOR=neatvi
     export TERMINAL=xterm
     export BROWSER=qutebrowser
 
