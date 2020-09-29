@@ -236,8 +236,9 @@ you can set this to run at boot by adding it to `rc.local`
 
     echo 'con2fbmap 2 1' | sudo tee -a /etc/rc.local
 
-if you want xorg to use both screens instead, don't do the con2fbmap stuff and put this in your
-`/etc/X11/xorg.conf`
+if you want xorg to use both screens instead, put this in your `/etc/X11/xorg.conf`
+
+you still need the con2fbmap in `rc.local` to initialize the fbdev
 
     Section "Device"
             Identifier      "FBDEV 0"
