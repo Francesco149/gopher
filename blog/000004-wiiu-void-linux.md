@@ -202,13 +202,11 @@ note: you need to install xtools for these (which includes xlocate)
 
 note: run `source ~/.bashrc` to refresh aliases without relogging
 
-for the desktop I have my own fork of dwm and st which I compile and install from source
+for the desktop I have my own fork of dwm which I compile and install from source
 
     xi libX11-devel libxcb-devel libXft-devel gcc make dmenu xorg-minimal libXinerama-devel \
-       pkg-config harfbuzz-devel xf86-video-fbdev mesa-dri
+       pkg-config harfbuzz-devel xf86-video-fbdev mesa-dri xterm
     cd /path/to/dwm
-    sudo make install
-    cd /path/to/st
     sudo make install
 
 and this is my `~/.xinitrc` (install xset nitrogen and clipmenu)
@@ -278,7 +276,7 @@ if you want xorg to use both screens instead, don't do the con2fbmap stuff and p
 I also exported (and installed) a few default applications in my `~/.bashrc`
 
     export EDITOR=nvim
-    export TERMINAL=st
+    export TERMINAL=xterm
     export BROWSER=qutebrowser
 
 let's test that xorg works by running `startx`
