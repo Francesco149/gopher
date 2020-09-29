@@ -202,6 +202,11 @@ note: you need to install xtools for these (which includes xlocate)
 
 note: run `source ~/.bashrc` to refresh aliases without relogging
 
+also, since audio isn't supported for now you want to config alsa to use the null output so
+programs that need audio don't crash
+
+    echo 'pcm.!default "null"' > ~/.asoundrc
+
 for the desktop I have my own fork of dwm which I compile and install from source
 
     xi libX11-devel libxcb-devel libXft-devel gcc make dmenu xorg-minimal libXinerama-devel \
