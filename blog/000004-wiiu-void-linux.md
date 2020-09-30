@@ -85,13 +85,15 @@ mount your fat32 sd partition and copy the kernel over
 
 create `/mnt/sd/linux/boot.cfg` and put the following in it. it will allow you to boot from sd
 
+note also the rtl params, these disable power management because it's buggy
+
     [loader]
     default=sd
 
     [profile:sd]
     name=SD
     kernel=sdmc:/linux/dtbImage.wiiu
-    cmdline=root=/dev/mmcblk0p2 rootwait
+    cmdline=root=/dev/mmcblk0p2 rootwait rtl8xxxu.rtw_power_mgnt=0 rtl8xxxu.rtw_enusbss=0
 
 you also need the latest `fw.img` for the linux loader, download it from here:
 https://gitlab.com/linux-wiiu/linux-loader/-/jobs/artifacts/master/raw/fw.img?job=master-build
