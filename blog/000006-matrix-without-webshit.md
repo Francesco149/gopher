@@ -110,7 +110,8 @@ the keyboard shortcuts
 # compiling QuickMedia from source
 if your distro doesn't package QuickMedia, here's how to build from source
 
-first of all install git
+first of all install git and libgit (also install development headers if that applies to your
+distro, for example libgit2-dev on ubuntu)
 
 now run these commands:
 
