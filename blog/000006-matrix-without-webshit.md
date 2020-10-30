@@ -95,7 +95,8 @@ never need to use that except for verification
 
 # setting up QuickMedia
 if you are on arch-based distros you can install quickmedia-git on the AUR, or get binary builds
-from [chaotic-aur](https://lonewolf.pedrohlc.com/chaotic-aur/) .
+from [chaotic-aur](https://lonewolf.pedrohlc.com/chaotic-aur/) . if you are on other distros,
+below is a guide to compile it from source.
 
 now, run `QuickMedia matrix` or create a shortcut that calls it and enter your user/password, but
 set the homeserver to `http://localhost:8009` . it should connect and you should have access to
@@ -105,3 +106,46 @@ of sessions.
 
 check out the [about page](https://git.dec05eba.com/QuickMedia/about/) of QuickMedia to learn
 the keyboard shortcuts
+
+# compiling QuickMedia from source
+if your distro doesn't package QuickMedia, here's how to build from source
+
+first of all install git
+
+now run these commands:
+
+    git clone --recursive https://git.dec05eba.com/sibs
+    cd sibs
+    ./cmake/install.sh
+    cd ..
+    git clone --recursive https://git.dec05eba.com/QuickMedia
+    cd QuickMedia
+    sibs build --release
+    sudo mkdir /usr/share/quickmedia/
+    sudo cp -r images/ icons/ shaders/ boards.json input.conf /usr/share/quickmedia/
+    sudo cp launcher/* /usr/share/applications/
+    sudo cp "sibs-build/$(sibs platform)/release/QuickMedia" /usr/bin/
+
+now you can continue from "setting up QuickMedia"
+
+to update, you can do this (replace /path/to with where those dirs are located)
+
+    cd /path/to/sibs
+    git fetch --all --recurse-submodules=yes
+    git reset --hard origin/HEAD
+    git clean -dffx
+    git submodule update --recursive
+    ./cmake/install.sh
+
+    cd /path/to/QuickMedia
+    git fetch --all --recurse-submodules=yes
+    git reset --hard origin/HEAD
+    git clean -dffx
+    git submodule update --recursive
+    sibs build --release
+    sudo mkdir /usr/share/quickmedia/
+    sudo cp -r images/ icons/ shaders/ boards.json input.conf /usr/share/quickmedia/
+    sudo cp launcher/* /usr/share/applications/
+    sudo cp "sibs-build/$(sibs platform)/release/QuickMedia" /usr/bin/
+
+put these commands in a script for quick usage
